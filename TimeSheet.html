@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskSync - Project Management & Time Tracking</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-dark: #334155;
+            --text-light: #94a3b8;
+            --border: #cbd5e1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-title {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+        }
+
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background-color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .user-role {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            background-color: white;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            float: right;
+            font-size: 2.25rem;
+            color: rgba(37, 99, 235, 0.2);
+            margin-top: -2.5rem;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .project-meta {
+            display: flex;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-description {
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .project-body {
+            padding: 1rem 1.25rem;
+        }
+
+        .project-progress {
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-bar {
+            height: 0.5rem;
+            background-color: #e2e8f0;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            background-color: var(--primary);
+        }
+
+        .project-team {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .team-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .team-members {
+            display: flex;
+        }
+
+        .member-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-right: -0.5rem;
+            border: 2px solid white;
+        }
+
+        .task-list {
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+        }
+
+        .task-item {
+            display: flex;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            margin-right: 1rem;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .task-tag {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+
+        .task-meta {
+            display: flex;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .task-meta div {
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .task-meta i {
+            margin-right: 0.25rem;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .task-action-btn {
+            padding: 0.25rem;
+            margin-left: 0.5rem;
+            border-radius: 0.25rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .task-action-btn:hover {
+            color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 6rem;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-weight: 500;
+            color: var(--text-light);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .chart {
+            height: 250px;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .time-entry {
+            display: flex;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+
+        .time-entry-project {
+            width: 120px;
+            font-weight: 500;
+        }
+
+        .time-entry-task {
+            flex: 1;
+        }
+
+        .time-entry-duration {
+            width: 100px;
+            text-align: right;
+        }
+
+        .time-entry-controls {
+            width: 90px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .time-entry-btn {
+            padding: 0.25rem;
+            margin-left: 0.25rem;
+            border-radius: 0.25rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .time-entry-btn:hover {
+            color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 60px;
+                overflow: hidden;
+                transition: max-height 0.3s;
+            }
+
+            .sidebar.expanded {
+                max-height: 100vh;
+            }
+
+            .sidebar-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 1.5rem;
+            }
+
+            .mobile-toggle {
+                display: block;
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-tasks"></i>
+                    <span>TaskSync</span>
+                </div>
+                <div class="mobile-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-title">Main</div>
+                <div class="menu-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" data-page="projects">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Projects</span>
+                </div>
+                <div class="menu-item" data-page="tasks">
+                    <i class="fas fa-tasks"></i>
+                    <span>Tasks</span>
+                </div>
+                <div class="menu-item" data-page="time-tracking">
+                    <i class="fas fa-clock"></i>
+                    <span>Time Tracking</span>
+                </div>
+                <div class="menu-title">Reports</div>
+                <div class="menu-item" data-page="project-reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Project Reports</span>
+                </div>
+                <div class="menu-item" data-page="employee-reports">
+                    <i class="fas fa-user-clock"></i>
+                    <span>Employee Reports</span>
+                </div>
+                <div class="menu-title">Settings</div>
+                <div class="menu-item" data-page="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="top-bar">
+                <div>
+                    <button class="btn btn-outline" id="role-switcher">
+                        <i class="fas fa-exchange-alt"></i>
+                        Switch Role
+                    </button>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">JS</div>
+                    <div>
+                        <div>John Smith</div>
+                        <div class="user-role">Project Manager</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-wrapper">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="tab-content active">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <button class="btn btn-primary" id="create-project-btn">
+                            <i class="fas fa-plus"></i>
+                            New Project
+                        </button>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-title">Active Projects</div>
+                            <div class="stat-value">12</div>
+                            <div class="stat-icon"><i class="fas fa-project-diagram"></i></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Tasks In Progress</div>
+                            <div class="stat-value">48</div>
+                            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Hours Tracked (This Week)</div>
+                            <div class="stat-value">164</div>
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Upcoming Deadlines</div>
+                            <div class="stat-value">7</div>
+                            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Recent Projects</div>
+                            <a href="#" class="btn btn-outline btn-sm">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="projects-grid">
+                                <div class="project-card">
+                                    <div class="project-header">
+                                        <h3 class="project-title">Website Redesign</h3>
+                                        <div class="project-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Apr 1 - May 15</div>
+                                        </div>
+                                        <div class="project-description">Redesign and develop the company's main website with improved UX and mobile responsiveness.</div>
+                                    </div>
+                                    <div class="project-body">
+                                        <div class="project-progress">
+                                            <div class="progress-label">
+                                                <span>Progress</span>
+                                                <span>65%</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-value" style="width: 65%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="project-team">
+                                            <div class="team-title">Team:</div>
+                                            <div class="team-members">
+                                                <div class="member-avatar">JS</div>
+                                                <div class="member-avatar">AK</div>
+                                                <div class="member-avatar">ML</div>
+                                                <div class="member-avatar">+2</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="project-card">
+                                    <div class="project-header">
+                                        <h3 class="project-title">Mobile App Development</h3>
+                                        <div class="project-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Mar 15 - Jun 30</div>
+                                        </div>
+                                        <div class="project-description">Develop a new mobile application for customer engagement and loyalty programs.</div>
+                                    </div>
+                                    <div class="project-body">
+                                        <div class="project-progress">
+                                            <div class="progress-label">
+                                                <span>Progress</span>
+                                                <span>42%</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-value" style="width: 42%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="project-team">
+                                            <div class="team-title">Team:</div>
+                                            <div class="team-members">
+                                                <div class="member-avatar">RJ</div>
+                                                <div class="member-avatar">TK</div>
+                                                <div class="member-avatar">BL</div>
+                                                <div class="member-avatar">+4</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="project-card">
+                                    <div class="project-header">
+                                        <h3 class="project-title">Database Migration</h3>
+                                        <div class="project-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Apr 10 - May 5</div>
+                                        </div>
+                                        <div class="project-description">Migrate from legacy database system to new cloud-based solution with minimal downtime.</div>
+                                    </div>
+                                    <div class="project-body">
+                                        <div class="project-progress">
+                                            <div class="progress-label">
+                                                <span>Progress</span>
+                                                <span>78%</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-value" style="width: 78%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="project-team">
+                                            <div class="team-title">Team:</div>
+                                            <div class="team-members">
+                                                <div class="member-avatar">DM</div>
+                                                <div class="member-avatar">SW</div>
+                                                <div class="member-avatar">JL</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Recent Tasks</div>
+                            <a href="#" class="btn btn-outline btn-sm">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="task-list">
+                                <div class="task-item">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task1">
+                                    </div>
+                                    <div class="task-content">
+                                        <div class="task-title">
+                                            Create wireframes for new app features
+                                            <span class="task-tag">Design</span>
+                                        </div>
+                                        <div class="task-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Due: Apr 18</div>
+                                            <div><i class="far fa-clock"></i> 6h tracked</div>
+                                            <div><i class="far fa-user"></i> Assigned to: Alex King</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <div class="task-action-btn"><i class="fas fa-pencil-alt"></i></div>
+                                        <div class="task-action-btn"><i class="fas fa-trash"></i></div>
+                                    </div>
+                                </div>
+                                <div class="task-item">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task2">
+                                    </div>
+                                    <div class="task-content">
+                                        <div class="task-title">
+                                            Implement user authentication system
+                                            <span class="task-tag">Coding</span>
+                                        </div>
+                                        <div class="task-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Due: Apr 20</div>
+                                            <div><i class="far fa-clock"></i> 12h tracked</div>
+                                            <div><i class="far fa-user"></i> Assigned to: Maria Lopez</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <div class="task-action-btn"><i class="fas fa-pencil-alt"></i></div>
+                                        <div class="task-action-btn"><i class="fas fa-trash"></i></div>
+                                    </div>
+                                </div>
+                                <div class="task-item">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task3">
+                                    </div>
+                                    <div class="task-content">
+                                        <div class="task-title">
+                                            Meeting with client to discuss requirements
+                                            <span class="task-tag">Discussion</span>
+                                        </div>
+                                        <div class="task-meta">
+                                            <div><i class="far fa-calendar-alt"></i> Due: Apr 16</div>
+                                            <div><i class="far fa-clock"></i> 2h tracked</div>
+                                            <div><i class="far fa-user"></i> Assigned to: John Smith</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <div class="task-action-btn"><i class="fas fa-pencil-alt"></i></div>
+                                        <div class="task-action-btn"><i class="fas fa-trash"></i></div>
+                                    </div>
+                                </div>
